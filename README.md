@@ -28,7 +28,7 @@ The goal is to transform financial records into actionable insights, helping org
 
 ## Project Status
 
-Currently under development.
+Currently under development...SS
 
 ## Author
 
