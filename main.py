@@ -1,4 +1,3 @@
-
 import sqlite3
 from datetime import date
 
@@ -95,6 +94,64 @@ def listar_despesas():
     print(f"\nTotal das despesas: R$ {total:.2f}")
 
 
+def relatorio_financeiro():
+    """Gera um resumo financeiro das despesas registadas."""
+
+    conexao = conectar()
+
+    total = conexao.execute(
+        """
+        SELECT COALESCE(SUM(valor), 0)
+        FROM despesas
+        """
+    ).fetchone()[0]
+
+    categorias = conexao.execute(
+        """
+        SELECT categoria, SUM(valor)
+        FROM despesas
+        GROUP BY categoria
+        ORDER BY SUM(valor) DESC
+        """
+    ).fetchall()
+
+    maior_despesa = conexao.execute(
+        """
+        SELECT descricao, categoria, valor, data
+        FROM despesas
+        ORDER BY valor DESC, id DESC
+        LIMIT 1
+        """
+    ).fetchone()
+
+    conexao.close()
+
+    print("\n========== RELATÓRIO FINANCEIRO ==========")
+    print(f"\nTotal de despesas: R$ {total:.2f}")
+
+    print("\n--- DESPESAS POR CATEGORIA ---")
+
+    if categorias:
+        for categoria, valor in categorias:
+            print(f"{categoria}: R$ {valor:.2f}")
+    else:
+        print("Ainda não existem despesas registadas.")
+
+    print("\n--- MAIOR DESPESA ---")
+
+    if maior_despesa:
+        descricao, categoria, valor, data_despesa = maior_despesa
+
+        print(f"Descrição: {descricao}")
+        print(f"Categoria: {categoria}")
+        print(f"Valor: R$ {valor:.2f}")
+        print(f"Data: {data_despesa}")
+    else:
+        print("Ainda não existem despesas registadas.")
+
+    print("\n===========================================")
+
+
 def menu():
     """Apresenta o menu principal do Ombuto AI."""
 
@@ -107,21 +164,22 @@ def menu():
         print("==============================")
         print("1. Registar despesa")
         print("2. Consultar despesas")
-        print("3. Sair")
+        print("3. Relatório financeiro")
+        print("4. Sair")
 
         opcao = input("\nEscolhe uma opção: ").strip()
 
         if opcao == "1":
             registar_despesa()
         elif opcao == "2":
-
-            
             listar_despesas()
         elif opcao == "3":
+            relatorio_financeiro()
+        elif opcao == "4":
             print("Obrigado por utilizares o Ombuto AI!")
             break
         else:
-            print("Opção inválida. Escolhe 1, 2 ou 3.")
+            print("Opção inválida. Escolhe 1, 2, 3 ou 4.")
 
 
 if __name__ == "__main__":
